@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Page Title</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+</style>
+</head>
+<body>
+
+<h1>My Website</h1>
+<p>A website created by me.</p>
+
+
+<button type="button"
+onclick="document.getElementById('demo').innerHTML = Date()">
+Click me to display Date and Time.</button>
+
+<p id="demo"></p>
+
+<button type="button"
+onclick="document.getElementById('masto').innerHTML = new httpGetAsync('https://mstdn.science/api/v1/accounts/109296180673456855/statuses', parseMastoJSON)">
+Click me to display statuses.</button>
+
+<p id="masto"></p>
+
+<script>
+function httpGetAsync(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+
+function parseMastoJSON(statuses)
+{
+  
+
+  var jStatuses= JSON.parse(statuses);
+  var miTag = "MiCU"
+  var finalText = ""
+
+  // check that it is not a reblog
+  // check that it has the [CU] tag
+  for (let i = 0; i < jStatuses.length; i++) {
+    jStatus = jStatuses[i]
+    // check that it is not a reblog
+    if (jStatus.content != ""){
+      // check that it has the [CU] tag
+      if (jStatus.content.includes(miTag)){
+        finalText += "\n" + jStatus.content
+      }
+      //console.log(scores[i]);
+    }
+  }
+
+  // return miTag
+
+  document.getElementById('masto').innerHTML = finalText;
+}
+
+// new httpGetAsync('https://mstdn.science/api/v1/accounts/109296180673456855/statuses', parseMastoJSON)
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Page Title</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#hierarchy{
+  transform: translate(100px,50px);
+}
+#comment{
+  color: grey
+}
+
+</style>
+</head>
+<body>
+
+<h1>My Website</h1>
+
+<div id="mastoStatus"></div>
+
+
+<!-- <button type="button"
+onclick="document.getElementById('masto').innerHTML = new httpGetAsync('https://mstdn.science/api/v1/statuses/110337557170602617/context', parseStatusContext, 'descendants')">
+Click me to display the hierarchy.</button> -->
+
+<div id='descendants0'>
+  <div id='hierarchies0'></div>
+  <div id='comments0'></div>
+</div>
+
+<script>
+function httpGetAsync(theUrl, callback, divID) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText, divID);
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+
+function fetchComments(statusID, divID) {
+  apiUrl = 'https://mstdn.science/api/v1/statuses/' + statusID + '/context' 
+  new httpGetAsync(apiUrl, parseComments, divID)
+}
+
+
+function parseComments(requestResult, divID){
+  var hierTag = "&gt;"
+    
+  var jStatus= JSON.parse(requestResult);
+  console.log(jStatus)
+  var finalText = ""
+
+  for (let i = 0; i < jStatus.descendants.length; i++) {
+    descendant = jStatus.descendants[i]
+    console.log(descendant)
+    // check that it is not a reblog
+    if (descendant.content != ""){
+      // check if ia a comment
+      if (!descendant.content.includes(hierTag)){
+        // elementContent = "<div id='commentLvl" + level + "'>"
+        elementContent = "<div id='comment'>"
+        //level = level + 1
+        elementContent = elementContent + "*" + htmlFormatStatus(descendant)
+        elementContent = elementContent + "</div>\n"
+        finalText += elementContent
+        // if(firstComment){
+        //   // show/hide button
+        // }
+        // firstComment = false
+      } 
+    }
+  }
+
+  document.getElementById(divID).innerHTML = finalText;
+}
+
+
+function fetchHierarchy(statusID, divID) {
+  apiUrl = 'https://mstdn.science/api/v1/statuses/' + statusID + '/context' 
+  new httpGetAsync(apiUrl, parseHierarchy, divID)
+}
+
+
+function parseHierarchy(requestResult, divID){
+  var hierTag = "&gt;"
+    
+  var jStatus= JSON.parse(requestResult);
+  console.log(jStatus)
+  var finalText = ""
+
+  // parse hierarchy level from div id
+  level = parseInt(divID.slice(-1)) + 1
+  hDiv = 'hierarchies' + level
+  cDiv = 'comments' + level
+
+  for (let i = 0; i < jStatus.descendants.length; i++) {
+    descendant = jStatus.descendants[i]
+    // console.log(descendant)
+    // check that it is not a reblog
+    if (descendant.content != ""){
+      // check if is a hierarchy
+      if (descendant.content.includes(hierTag)){
+        elementContent = "<div id='hierarchy'>"
+        elementContent = elementContent + " " + htmlFormatStatus(descendant)
+        // button to display comments
+        elementContent = elementContent + getShowCommentsButton(descendant.id, level)
+        //to do add level here
+        elementContent = elementContent + "<div id='descendants'> <div id='"
+                       + hDiv
+                       + "'></div> <div id='"
+                       + cDiv
+                       + "'></div></div>"
+        elementContent = elementContent + "</div>\n"
+        finalText += elementContent
+      }
+    }
+  }
+
+    document.getElementById(divID).innerHTML = finalText;
+}
+
+
+function htmlFormatStatus(jStatus){
+  var finalText = jStatus.content
+  // look for images
+  if (jStatus.media_attachments.length>0){
+    for (let i = 0; i < jStatus.media_attachments.length; i++) {
+      attachment = jStatus.media_attachments[i]
+      if (attachment.type=="image"){
+        finalText += "\n<img src='" + attachment.url + "' alt='" + attachment.description + "' >"
+      }
+    }
+    
+  }
+
+  return finalText
+}
+
+
+function parseMastoStatus(s) {
+  var jStatus= JSON.parse(s);
+  //console.log(jStatus)
+  document.getElementById('mastoStatus').innerHTML = htmlFormatStatus(jStatus);
+}
+
+
+function getShowCommentsButton(statusID, level){
+  var htmlText = ""
+  htmlText = htmlText + "<button type='button'"
+           + "onclick='fetchAllDescendants(\"" + "110337557170602617" + "\"," + level + ")'>" 
+           + "Show hierarchy and comments.</button>"
+
+  return htmlText
+}
+
+
+function fetchAllDescendants(statusID, level){
+  hDiv = 'hierarchies' + level
+  cDiv = 'comments' + level
+  fetchHierarchy(statusID, hDiv)
+  fetchComments(statusID, cDiv)
+}
+
+
+new httpGetAsync('https://mstdn.science/api/v1/statuses/110337557170602617/', parseMastoStatus)
+fetchAllDescendants('110337557170602617', 0)
+
+
+</script>
+
+</body>
+</html>
