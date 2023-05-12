@@ -9,11 +9,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-#hierarchy{
+.hierarchy{
   transform: translate(100px,50px);
+  padding: 1em;
 }
-#comment{
-  color: grey
+.comment{
+  color: grey;
+  padding: 1em;
 }
 
 </style>
@@ -23,16 +25,12 @@ body {
 <h1>My Website</h1>
 
 <div id="mastoStatus"></div>
-
-
-<!-- <button type="button"
-onclick="document.getElementById('masto').innerHTML = new httpGetAsync('https://mstdn.science/api/v1/statuses/110337557170602617/context', parseStatusContext, 'descendants')">
-Click me to display the hierarchy.</button> -->
-
 <div id='descendants0'>
   <div id='hierarchies0'></div>
   <div id='comments0'></div>
 </div>
+
+<hr>
 
 <script>
 function httpGetAsync(theUrl, callback, divID) {
@@ -67,15 +65,11 @@ function parseComments(requestResult, divID){
       // check if ia a comment
       if (!descendant.content.includes(hierTag)){
         // elementContent = "<div id='commentLvl" + level + "'>"
-        elementContent = "<div id='comment'>"
+        elementContent = "<div class='comment'>"
         //level = level + 1
-        elementContent = elementContent + "*" + htmlFormatStatus(descendant)
+        elementContent = elementContent + htmlFormatStatus(descendant) 
         elementContent = elementContent + "</div>\n"
         finalText += elementContent
-        // if(firstComment){
-        //   // show/hide button
-        // }
-        // firstComment = false
       } 
     }
   }
@@ -109,17 +103,17 @@ function parseHierarchy(requestResult, divID){
     if (descendant.content != ""){
       // check if is a hierarchy
       if (descendant.content.includes(hierTag)){
-        elementContent = "<div id='hierarchy'>"
+        elementContent = "<div class='hierarchy'>"
         elementContent = elementContent + " " + htmlFormatStatus(descendant)
         // button to display comments
-        elementContent = elementContent + getShowCommentsButton(descendant.id, level)
+        elementContent = elementContent + "<br>" + getShowCommentsButton(descendant.id, level) + "<br>"
         //to do add level here
         elementContent = elementContent + "<div id='descendants'> <div id='"
-                       + hDiv
+                       + hDiv 
                        + "'></div> <div id='"
-                       + cDiv
+                       + cDiv 
                        + "'></div></div>"
-        elementContent = elementContent + "</div>\n"
+        elementContent = elementContent + "</div>"
         finalText += elementContent
       }
     }
