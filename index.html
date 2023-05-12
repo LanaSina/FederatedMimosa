@@ -10,12 +10,18 @@ body {
 }
 
 .hierarchy{
-  transform: translate(100px,50px);
+  width: 100%;
   padding: 1em;
+  padding-left: 5em;
+  box-sizing: border-box;
 }
 .comment{
   color: grey;
   padding: 1em;
+}
+#main-wrapper {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 </style>
@@ -29,9 +35,10 @@ body {
 <button type='button' id='urlButton' onclick='fetchFediversePost()'> Go </button>
 
 
-
-<div id="mastoStatus"></div>
-<div id="wholeTree"></div>
+<div id="main-wrapper">
+  <div id="mastoStatus"></div>
+  <div id="wholeTree"></div>
+</div>
 
 <script>
 function httpGetAsync(theUrl, callback, divID) {
