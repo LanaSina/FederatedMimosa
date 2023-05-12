@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Page Title</title>
+<title>Federated Mimosa</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -22,7 +22,12 @@ body {
 </head>
 <body>
 
-<h1>My Website</h1>
+<h1>Fediprint for ALife2023: Self-Replication, Spontaneous Mutations, and Exponential Genetic Drift in Neural Cellular Automata</h1>
+
+<label for="fediUrl">Url of the post to reformat</label>
+<input type="text" id="fediUrl" name="Url" required size="50" value="https://mstdn.science/@lana/110354052667093132">
+<button type='button' id='urlButton' onclick='fetchFediversePost()'> Go </button>
+
 
 <div id="mastoStatus"></div>
 <div id='descendants0'>
@@ -30,7 +35,6 @@ body {
   <div id='comments0'></div>
 </div>
 
-<hr>
 
 <script>
 function httpGetAsync(theUrl, callback, divID) {
@@ -41,6 +45,17 @@ function httpGetAsync(theUrl, callback, divID) {
     }
     xmlHttp.open("GET", theUrl, true); // true for asynchronous 
     xmlHttp.send(null);
+}
+
+
+function fetchFediversePost(){
+  const theUrl = document.getElementById("fediUrl").value
+  console.log(theUrl)
+  // parse for id
+  const words = theUrl.split('/');
+  console.log(words)
+  const postId = words[words.length-1]
+  new httpGetAsync('https://mstdn.science/api/v1/statuses/' + postId , parseMastoStatus)
 }
 
 
@@ -144,6 +159,15 @@ function parseMastoStatus(s) {
   var jStatus= JSON.parse(s);
   //console.log(jStatus)
   document.getElementById('mastoStatus').innerHTML = htmlFormatStatus(jStatus);
+
+  const theUrl = document.getElementById("fediUrl").value
+  console.log(theUrl)
+  // parse for id
+  const words = theUrl.split('/');
+  console.log(words)
+  const postId = words[words.length-1]
+  
+  fetchAllDescendants(postId, 0)
 }
 
 
@@ -165,8 +189,8 @@ function fetchAllDescendants(statusID, level){
 }
 
 
-new httpGetAsync('https://mstdn.science/api/v1/statuses/110337557170602617/', parseMastoStatus)
-fetchAllDescendants('110337557170602617', 0)
+// new httpGetAsync('https://mstdn.science/api/v1/statuses/110337557170602617/', parseMastoStatus)
+// fetchAllDescendants('110337557170602617', 0)
 
 
 </script>
