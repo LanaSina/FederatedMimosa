@@ -55,35 +55,6 @@ function fetchFediversePost(){
 }
 
 
-
-function parseComments(requestResult, divID){
-  // todo make this global
-  var hierTag = "&gt;"
-  const plusTag = "+"
-
-  var jStatus= JSON.parse(requestResult);
-  console.log(jStatus)
-  var finalText = "<p>Comments</p>"
-
-  for (let i = 0; i < jStatus.descendants.length; i++) {
-    descendant = jStatus.descendants[i]
-    console.log(descendant)
-    // check that it is not a reblog
-    if (descendant.content != ""){
-      // check if ia a comment
-      if (!descendant.content.includes(hierTag) & !descendant.content.includes(plusTag)){
-        elementContent = "<div class='comment'>" 
-        elementContent = elementContent + htmlFormatStatus(descendant) 
-        elementContent = elementContent + "</div>\n"
-        finalText += elementContent
-      } 
-    }
-  }
-
-  document.getElementById(divID).innerHTML = finalText;
-}
-
-
 function fetchHierarchy(statusID, divID) {
   apiUrl = 'https://mstdn.science/api/v1/statuses/' + statusID + '/context' 
   //new httpGetAsync(apiUrl, parseHierarchy, divID)
@@ -101,9 +72,11 @@ function createDivTree(requestResult, divID){
   for (let i = 0; i < jStatus.descendants.length; i++) {
     descendant = jStatus.descendants[i]
 
-    let innerDiv = document.createElement('div');
-    innerDiv.id = descendant.id
-    innerDiv.innerHTML = htmlFormatStatus(descendant)
+    // let innerDiv = document.createElement('div');
+    // innerDiv.id = descendant.id
+    // innerDiv.innerHTML = htmlFormatStatus(descendant)
+
+    let innerDiv = formatStatusDiv(descendant)
 
     // if the status is >, add it as hidden child
     if (descendant.content.includes(hierTag)){
@@ -157,6 +130,39 @@ function getShowButton(hierarchyDiv){
 }
 
 
+function formatStatusDiv(jStatus){
+  let divStatus = document.createElement('div')
+  divStatus.innerHTML = jStatus.content
+  divStatus.id = jStatus.id
+
+  // look for images
+  if (jStatus.media_attachments.length>0){
+    for (let i = 0; i < jStatus.media_attachments.length; i++) {
+      attachment = jStatus.media_attachments[i]
+      if (attachment.type=="image"){
+        let img = document.createElement('img')
+        img.src = attachment.url 
+        img.alt = attachment.description
+        divStatus.appendChild(img)
+      }
+    }  
+  }
+
+  // look for videos
+  if(jStatus.card != null){
+    if(isVideo(jStatus.card.url)){
+      const embedUrl = jStatus.card.url.split("&")[0].replace("watch?v=", "embed/")
+      console.log(embedUrl)
+      let videoFrame = embedVideo(embedUrl)
+      divStatus.appendChild(videoFrame)
+    }
+  }
+
+  return divStatus
+}
+
+
+
 function htmlFormatStatus(jStatus){
   var finalText = jStatus.content
   // look for images
@@ -166,24 +172,44 @@ function htmlFormatStatus(jStatus){
       if (attachment.type=="image"){
         finalText += "\n<img src='" + attachment.url + "' alt='" + attachment.description + "' >"
       }
-    }
-    
+    }   
   }
 
   return finalText
 }
 
 
+function embedVideo(videoUrl){
+  iframe = document.createElement('iframe');
+  iframe.src = videoUrl
+  iframe.width = "420" 
+  iframe.height = "315"
+
+  return iframe
+}
+
+
+function isVideo(urlText){
+  if(urlText == null){
+    return false
+  }
+  if (urlText.includes("https://www.youtube.com/watch") | urlText.includes("https://www.youtube.com/embed")){
+    return true
+  }
+
+  return false
+}
+
+
 function parseMastoStatus(s) {
   var jStatus= JSON.parse(s);
   //console.log(jStatus)
-  var innerDiv = document.createElement('div');
-  innerDiv.id = jStatus.id
-  innerDiv.innerHTML = htmlFormatStatus(jStatus)
+  // let innerDiv = document.createElement('div')
+  // innerDiv.id = jStatus.id
+  // innerDiv.innerHTML = htmlFormatStatus(jStatus)
 
+  let innerDiv = formatStatusDiv(jStatus)
   document.getElementById('wholeTree').appendChild(innerDiv)
-
-  //.innerHTML = htmlFormatStatus(jStatus);
 
   const theUrl = document.getElementById("fediUrl").value
   // parse for id
