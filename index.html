@@ -32,11 +32,6 @@ body {
 
 <div id="mastoStatus"></div>
 <div id="wholeTree"></div>
-<div id='descendants0'>
-  <div id='hierarchies0'></div>
-  <div id='comments0'></div>
-</div>
-
 
 <script>
 function httpGetAsync(theUrl, callback, divID) {
@@ -59,11 +54,6 @@ function fetchFediversePost(){
   new httpGetAsync('https://mstdn.science/api/v1/statuses/' + postId , parseMastoStatus)
 }
 
-
-function fetchComments(statusID, divID) {
-  apiUrl = 'https://mstdn.science/api/v1/statuses/' + statusID + '/context' 
-  new httpGetAsync(apiUrl, parseComments, divID)
-}
 
 
 function parseComments(requestResult, divID){
@@ -111,7 +101,7 @@ function createDivTree(requestResult, divID){
   for (let i = 0; i < jStatus.descendants.length; i++) {
     descendant = jStatus.descendants[i]
 
-    var innerDiv = document.createElement('div');
+    let innerDiv = document.createElement('div');
     innerDiv.id = descendant.id
     innerDiv.innerHTML = htmlFormatStatus(descendant)
 
@@ -119,21 +109,32 @@ function createDivTree(requestResult, divID){
     if (descendant.content.includes(hierTag)){
       // create root div of this hierarchy
       // find appropriate place, the container of the parent
-      divParent = document.getElementById(descendant.in_reply_to_id).parentNode
-      divSubRoot = document.createElement('div')
-      divSubRoot.classList.add("hierarchy")
-      divSubRoot.style.display = "none"
+      let divParent = document.getElementById(descendant.in_reply_to_id).parentNode
+      let divHierarchy = document.createElement('div')
+      divHierarchy.classList.add("hierarchy")
+      divHierarchy.style.display = "none"
+      // every hierarchy has its own comments
+      // var commentsDiv = document.createElement('div');
+      // commentsDiv.classList.add("comments")
+
       // first append hide/show button
-      showButton = getShowButton(divSubRoot)
+      const showButton = getShowButton(divHierarchy)
       divParent.appendChild(showButton)
-      divParent.appendChild(divSubRoot)
-      divSubRoot.appendChild(innerDiv)
+      // then append hierarchy
+      divParent.appendChild(divHierarchy)
+      // hierarchy has its content
+      divHierarchy.appendChild(innerDiv)
+      //divHierarchy.appendChild(commentsDiv)
+
     } else if (descendant.content.includes(plusTag)){
       // if the status is + add it to the parent 
-      divParent = document.getElementById(descendant.in_reply_to_id).parentNode
+      let divParent = document.getElementById(descendant.in_reply_to_id).parentNode
       divParent.appendChild(innerDiv)
     } else {
-      divRoot.appendChild(innerDiv)
+      // those are comments
+      let divParent = document.getElementById(descendant.in_reply_to_id)
+      innerDiv.classList.add("comment")
+      divParent.appendChild(innerDiv)
     }
     
   }
@@ -153,55 +154,6 @@ function getShowButton(hierarchyDiv){
   }
 
   return showButton
-}
-
-
-function parseHierarchy(requestResult, divID){
-  const hierTag = "&gt;"
-  const plusTag = "+"
-  const jStatus= JSON.parse(requestResult);
-  console.log(jStatus)
-  var finalText = ""
-
-  // parse hierarchy level from div id
-  level = parseInt(divID.slice(-1)) + 1
-  hDiv = 'hierarchies' + level
-  cDiv = 'comments' + level
-
-  for (let i = 0; i < jStatus.descendants.length; i++) {
-    descendant = jStatus.descendants[i]
-
-    // console.log(descendant)
-    // check that it is not a reblog 
-    if (descendant.content != ""){
-      // check if is a hierarchy
-      // cannot just take 1st char as mastodon adds <p>...
-      if (descendant.content.includes(hierTag)){
-        // check if the reply is to this status
-        if(descendant.in_reply_to_id==jStatus.id){
-          elementContent = "<div class='hierarchy'>"
-          elementContent = elementContent + " " + htmlFormatStatus(descendant)
-          // button to display comments
-          elementContent = elementContent + "<br>" + getShowCommentsButton(descendant.id, level) + "<br>"
-          //to do add level here
-          elementContent = elementContent + "<div id='descendants'> <div id='"
-                         + hDiv 
-                         + "'></div> <div id='"
-                         + cDiv 
-                         + "'></div></div>"
-          elementContent = elementContent + "</div>"
-          finalText += elementContent
-        }
-      } else if(descendant.content.includes(plusTag)){
-        //if (descendant.in_reply_to_id == jStatus.id){
-          // todo check if the user is "allowed" to do that
-          finalText =  finalText + htmlFormatStatus(descendant)
-        //}
-      }
-    }
-  }
-
-    document.getElementById(divID).innerHTML = finalText;
 }
 
 
@@ -259,10 +211,6 @@ function fetchAllDescendants(statusID, level){
   fetchHierarchy(statusID, "wholeTree")
   //fetchComments(statusID, cDiv)
 }
-
-
-// new httpGetAsync('https://mstdn.science/api/v1/statuses/110337557170602617/', parseMastoStatus)
-// fetchAllDescendants('110337557170602617', 0)
 
 
 </script>
