@@ -17,7 +17,7 @@ body {
 }
 .comment{
   color: grey;
-  padding: 1em;
+  padding-left: 1em;
 }
 #main-wrapper {
   width: 100%;
@@ -78,24 +78,17 @@ function createDivTree(requestResult, divID){
   // Create divs for all known children.
   for (let i = 0; i < jStatus.descendants.length; i++) {
     descendant = jStatus.descendants[i]
-
-    // let innerDiv = document.createElement('div');
-    // innerDiv.id = descendant.id
-    // innerDiv.innerHTML = htmlFormatStatus(descendant)
-
-    let innerDiv = formatStatusDiv(descendant)
+    
 
     // if the status is >, add it as hidden child
     if (descendant.content.includes(hierTag)){
+      let innerDiv = formatStatusDiv(descendant, "child")
       // create root div of this hierarchy
       // find appropriate place, the container of the parent
       let divParent = document.getElementById(descendant.in_reply_to_id).parentNode
       let divHierarchy = document.createElement('div')
       divHierarchy.classList.add("hierarchy")
       divHierarchy.style.display = "none"
-      // every hierarchy has its own comments
-      // var commentsDiv = document.createElement('div');
-      // commentsDiv.classList.add("comments")
 
       // first append hide/show button
       const showButton = getShowButton(divHierarchy)
@@ -104,14 +97,14 @@ function createDivTree(requestResult, divID){
       divParent.appendChild(divHierarchy)
       // hierarchy has its content
       divHierarchy.appendChild(innerDiv)
-      //divHierarchy.appendChild(commentsDiv)
-
     } else if (descendant.content.includes(plusTag)){
+      let innerDiv = formatStatusDiv(descendant, "add")
       // if the status is + add it to the parent 
       let divParent = document.getElementById(descendant.in_reply_to_id).parentNode
       divParent.appendChild(innerDiv)
     } else {
       // those are comments
+      let innerDiv = formatStatusDiv(descendant, "comment")
       let divParent = document.getElementById(descendant.in_reply_to_id)
       innerDiv.classList.add("comment")
       divParent.appendChild(innerDiv)
@@ -137,20 +130,36 @@ function getShowButton(hierarchyDiv){
 }
 
 
-function formatStatusDiv(jStatus){
+function formatStatusDiv(jStatus, type){
   let divStatus = document.createElement('div')
   divStatus.innerHTML = jStatus.content
   divStatus.id = jStatus.id
+
 
   // look for images
   if (jStatus.media_attachments.length>0){
     for (let i = 0; i < jStatus.media_attachments.length; i++) {
       attachment = jStatus.media_attachments[i]
       if (attachment.type=="image"){
-        let img = document.createElement('img')
-        img.src = attachment.url 
-        img.alt = attachment.description
-        divStatus.appendChild(img)
+        if (type != "comment"){
+          let img = document.createElement('img')
+          img.src = attachment.url 
+          img.alt = attachment.description
+          img.style.maxWidth = "100%"
+          divStatus.appendChild(img)
+        } else{
+          // this is in a comment
+          let span = document.createElement('span')
+          let a = document.createElement('a')
+          a.setAttribute('href', attachment.url)
+          a_innerHTML = "image" 
+          if(attachment.description != null){
+            a_innerHTML = a_innerHTML + ": " + attachment.description
+          }
+          a.innerHTML = a_innerHTML + "&nbsp;"
+          span.appendChild(a)
+          divStatus.appendChild(span)
+        }
       }
     }  
   }
@@ -158,32 +167,27 @@ function formatStatusDiv(jStatus){
   // look for videos
   if(jStatus.card != null){
     if(isVideo(jStatus.card.url)){
-      const embedUrl = jStatus.card.url.split("&")[0].replace("watch?v=", "embed/")
-      console.log(embedUrl)
-      let videoFrame = embedVideo(embedUrl)
-      divStatus.appendChild(videoFrame)
+      if (type != "comment"){
+        const embedUrl = jStatus.card.url.split("&")[0].replace("watch?v=", "embed/")
+        console.log(embedUrl)
+        let videoFrame = embedVideo(embedUrl)
+        divStatus.appendChild(videoFrame)
+      } else {
+        // this is in a comment
+        let span = document.createElement('span')
+        let a = document.createElement('a')
+        a.setAttribute('href', jStatus.card.url)
+        a.innerHTML = "video    " 
+        span.appendChild(a)
+        divStatus.appendChild(span)
+      }
     }
   }
+  
 
   return divStatus
 }
 
-
-
-function htmlFormatStatus(jStatus){
-  var finalText = jStatus.content
-  // look for images
-  if (jStatus.media_attachments.length>0){
-    for (let i = 0; i < jStatus.media_attachments.length; i++) {
-      attachment = jStatus.media_attachments[i]
-      if (attachment.type=="image"){
-        finalText += "\n<img src='" + attachment.url + "' alt='" + attachment.description + "' >"
-      }
-    }   
-  }
-
-  return finalText
-}
 
 
 function embedVideo(videoUrl){
@@ -210,10 +214,6 @@ function isVideo(urlText){
 
 function parseMastoStatus(s) {
   var jStatus= JSON.parse(s);
-  //console.log(jStatus)
-  // let innerDiv = document.createElement('div')
-  // innerDiv.id = jStatus.id
-  // innerDiv.innerHTML = htmlFormatStatus(jStatus)
 
   let innerDiv = formatStatusDiv(jStatus)
   document.getElementById('wholeTree').appendChild(innerDiv)
@@ -240,11 +240,10 @@ function getShowCommentsButton(statusID, level){
 function fetchAllDescendants(statusID, level){
   hDiv = 'hierarchies' + level
   cDiv = 'comments' + level
-
   fetchHierarchy(statusID, "wholeTree")
-  //fetchComments(statusID, cDiv)
 }
 
+fetchFediversePost("https://mstdn.science/@lana/110354052667093132")
 
 </script>
 
