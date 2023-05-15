@@ -117,12 +117,14 @@ function createDivTree(requestResult, divID){
 
 function getShowButton(hierarchyDiv){
   var showButton = document.createElement("button");
-  showButton.innerHTML = 'Show/Hide hierarchy';
+  showButton.innerHTML = 'Show hierarchy';
   showButton.onclick = function(){  
     if (hierarchyDiv.style.display === "none") {
       hierarchyDiv.style.display = "block";
+      showButton.innerHTML = 'Hide hierarchy';
     } else {
       hierarchyDiv.style.display = "none";
+      showButton.innerHTML = 'Show hierarchy';
     }
   }
 
@@ -227,14 +229,14 @@ function parseMastoStatus(s) {
 }
 
 
-function getShowCommentsButton(statusID, level){
-  var htmlText = ""
-  htmlText = htmlText + "<button type='button'"
-           + "onclick='fetchAllDescendants(\"" + statusID + "\"," + level + ")'>" 
-           + "Show hierarchy and comments.</button>"
+// function getShowCommentsButton(statusID, level){
+//   var htmlText = ""
+//   htmlText = htmlText + "<button type='button'"
+//            + "onclick='fetchAllDescendants(\"" + statusID + "\"," + level + ")'>" 
+//            + "Show hierarchy and comments.</button>"
 
-  return htmlText
-}
+//   return htmlText
+// }
 
 
 function fetchAllDescendants(statusID, level){
