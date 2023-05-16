@@ -53,11 +53,17 @@ function httpGetAsync(theUrl, callback, divID) {
 
 
 function fetchFediversePost(){
+  //first clear div
+  let divTree = document.getElementById('wholeTree')
+  divTree.replaceChildren();
+
+  // then call api
   const theUrl = document.getElementById("fediUrl").value
   console.log(theUrl)
   // parse for id
   const words = theUrl.split('/');
   const postId = words[words.length-1]
+  // TODO get api by instance eg https://mstdn.science/@716ninala@mstdn.social/110378932597901580 is at mstdn.social/
   new httpGetAsync('https://mstdn.science/api/v1/statuses/' + postId , parseMastoStatus)
 }
 
@@ -333,9 +339,11 @@ function parseMastoStatus(s) {
   innerDiv.appendChild(divHierarchy)
 
   // append self
-  let divParent = document.getElementById('wholeTree')
+  let divTree = document.getElementById('wholeTree')
+  let divParent = document.createElement('div')
   divParent.id = "hierarchies"+ jStatus.id
   divParent.appendChild(innerDiv)
+  divTree.appendChild(divParent)
 
   const theUrl = document.getElementById("fediUrl").value
   // parse for id
