@@ -86,11 +86,8 @@ function createDivTree(requestResult){
   // Create divs for all known children.
   for (let i = 0; i < jStatus.descendants.length; i++) { //jStatus.descendants.length
     descendant = jStatus.descendants[i]
-    // console.log(descendant.id)
-
     // if the status is >, add it as new hierarchy 
     if (descendant.content.includes(hierTag)){
-      // console.log(">")
       let innerDiv = formatStatusDiv(descendant, "child")
 
       // descendant containers: hierachy
@@ -112,9 +109,10 @@ function createDivTree(requestResult){
       innerDiv.appendChild(divHierarchy)
 
       // append self
-      // find appropriate place, the container of the parent
-      let divParent = document.getElementById(descendant.in_reply_to_id).parentNode
-      divParent.appendChild(innerDiv)
+      // find appropriate place, the parent's inner hierarchy
+      const parentDivHierarchyId = "hierarchies"+ descendant.in_reply_to_id
+      let parentDivHierarchy = document.getElementById(parentDivHierarchyId)
+      parentDivHierarchy.appendChild(innerDiv)
 
       // show hierarchy button of parent
       parentHierachyButtonId = "showButton" + descendant.in_reply_to_id
@@ -125,12 +123,7 @@ function createDivTree(requestResult){
       // if the status is + add it below parent in same hierarchy
       // console.log("+ to " + descendant.in_reply_to_id)
       let innerDiv = formatStatusDiv(descendant, "add")
-
-      let divParent = document.getElementById(descendant.in_reply_to_id)
-      const parentDivHierarchyId = "hierarchies"+ descendant.in_reply_to_id
-      let parentDivHierarchy = document.getElementById(parentDivHierarchyId)
-      // console.log("looking for divHierarchy.id "+ parentDivHierarchyId)
-    
+      
       // descendant containers: hierachy
       let divHierarchy = document.createElement('div')
       divHierarchy.id = "hierarchies"+ descendant.id
@@ -149,8 +142,9 @@ function createDivTree(requestResult){
       innerDiv.appendChild(showButton)
       innerDiv.appendChild(divHierarchy)
       // append self
-      parentDivHierarchy.appendChild(innerDiv)
-            
+      let divParent = document.getElementById(descendant.in_reply_to_id).parentNode
+      divParent.appendChild(innerDiv)
+
     } else {
       // those are comments      
       // the parent of the div right before
