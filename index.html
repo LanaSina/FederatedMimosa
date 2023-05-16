@@ -80,7 +80,7 @@ function createDivTree(requestResult, divID){
     descendant = jStatus.descendants[i]
     
 
-    // if the status is >, add it as hidden child
+    // if the status is >, add it as child
     if (descendant.content.includes(hierTag)){
       let innerDiv = formatStatusDiv(descendant, "child")
       // create root div of this hierarchy
@@ -89,31 +89,86 @@ function createDivTree(requestResult, divID){
       let divHierarchy = document.createElement('div')
       divHierarchy.classList.add("hierarchy")
       divHierarchy.style.display = "none"
-
-      // first append hide/show button
+      // hide/show button for the parent (todo deal with parent that has several children)
       const showButton = getShowButton(divHierarchy)
+      
+      
+      // comments div for show comments button
+      const commentDivId = "comments" + descendant.id
+      let divComments = document.createElement('div')
+      divComments.id = commentDivId
+      divComments.style.display = "none"
+      // create show comments button
+      const showCommentButtonId = "showComments" + descendant.id
+      let showCommentsButton = getShowCommentsButton(divComments)
+      showCommentsButton.id = showCommentButtonId
+      showCommentsButton.hidden = "hidden"
+      // add to container of parent
+      innerDiv.appendChild(showCommentsButton)
+      innerDiv.appendChild(divComments)
+
+      // append show hierarchy button
       divParent.appendChild(showButton)
       // then append hierarchy
       divParent.appendChild(divHierarchy)
-      // hierarchy has its content
+      // add the content to hierarchy
       divHierarchy.appendChild(innerDiv)
     } else if (descendant.content.includes(plusTag)){
-      let innerDiv = formatStatusDiv(descendant, "add")
       // if the status is + add it to the parent 
       let divParent = document.getElementById(descendant.in_reply_to_id).parentNode
+      let innerDiv = formatStatusDiv(descendant, "add")
+
+      
+      // comments div for show comments button
+      const commentDivId = "comments" + descendant.id
+      let divComments = document.createElement('div')
+      divComments.id = commentDivId
+      divComments.style.display = "none"
+      // create show comments button
+      const showCommentButtonId = "showComments" + descendant.id
+      let showCommentsButton = getShowCommentsButton(divComments)
+      showCommentsButton.id = showCommentButtonId
+      showCommentsButton.hidden = "hidden"
+      // add to container of parent
+      innerDiv.appendChild(showCommentsButton)
+      innerDiv.appendChild(divComments)
+
+
       divParent.appendChild(innerDiv)
     } else {
-      // those are comments
-      let innerDiv = formatStatusDiv(descendant, "comment")
+      // those are comments      
+      
+      // the parent of the div right before
       let divParent = document.getElementById(descendant.in_reply_to_id)
-      innerDiv.classList.add("comment")
-      divParent.appendChild(innerDiv)
+      let divComments = null
+      let divCommentsIDNumber = 0
+      if(divParent.classList.contains("comment")){
+        // get the comment container, not the comment itself
+        divComments = divParent.parentNode
+        divCommentsIDNumber = divParent.parentNode.parentNode.id
+      } else {
+        //get the correct child
+        const commentDivId = "comments" + divParent.id
+        divComments = document.getElementById(commentDivId)
+        divCommentsIDNumber = divParent.id
+      }
+
+      console.log(divCommentsIDNumber)
+
+      // make button visible
+      const showCommentButtonId = "showComments" + divCommentsIDNumber
+      let showCommentsButton = document.getElementById(showCommentButtonId)
+      showCommentsButton.hidden = null
+
+
+      let innerDiv = formatStatusDiv(descendant, "comment")
+      innerDiv.classList.add("comment") 
+      divComments.appendChild(innerDiv)
     }
     
   }
 
 }
-
 
 function getShowButton(hierarchyDiv){
   var showButton = document.createElement("button");
@@ -125,6 +180,23 @@ function getShowButton(hierarchyDiv){
     } else {
       hierarchyDiv.style.display = "none";
       showButton.innerHTML = 'Show hierarchy';
+    }
+  }
+
+  return showButton
+}
+
+
+function getShowCommentsButton(hierarchyDiv){
+  var showButton = document.createElement("button");
+  showButton.innerHTML = 'Show comments';
+  showButton.onclick = function(){  
+    if (hierarchyDiv.style.display === "none") {
+      hierarchyDiv.style.display = "block";
+      showButton.innerHTML = 'Hide comments';
+    } else {
+      hierarchyDiv.style.display = "none";
+      showButton.innerHTML = 'Show comments';
     }
   }
 
@@ -227,16 +299,6 @@ function parseMastoStatus(s) {
 
   fetchAllDescendants(postId, 0)
 }
-
-
-// function getShowCommentsButton(statusID, level){
-//   var htmlText = ""
-//   htmlText = htmlText + "<button type='button'"
-//            + "onclick='fetchAllDescendants(\"" + statusID + "\"," + level + ")'>" 
-//            + "Show hierarchy and comments.</button>"
-
-//   return htmlText
-// }
 
 
 function fetchAllDescendants(statusID, level){
