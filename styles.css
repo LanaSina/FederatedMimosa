@@ -1,0 +1,101 @@
+*{
+  box-sizing: border-box;
+}
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+#main-container{
+  width: 1366px;
+  max-width: 98%;
+  border: solid 1px #ccc;
+  box-shadow: 1px 2px 5px 2px #ccc;
+  padding: 20px;
+  margin: 20px auto;
+}
+.hierarchy{
+  width: 100%;
+  padding: 1em;
+  box-sizing: border-box;
+}
+.comment{
+  color: grey;
+  padding-left: 1em;
+}
+#main-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+}
+#page-banner{
+  color: dodgerblue;
+  line-height: 1.4;
+  letter-spacing: 0.7px;
+  font-size: 25px;
+}
+button{
+  padding: 10px;
+  background-color: #fff;
+  color: #000;
+  cursor: pointer;
+  border-radius: 5px;
+  border: solid 1px #000;
+}
+
+button:hover{
+  background-color: #000;
+  transition: 1s linear;
+  color: #fff;
+}
+
+.text-center{
+  text-align: center;
+}
+input{
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 100%;
+}
+hr{
+  border: solid 0.5px #ccc;
+}
+#\31 10354072055653910 > div:nth-child(2){
+  text-align: center;
+}
+#\31 10354543217250799 > div:nth-child(3){
+  text-align: center;
+}
+iframe{
+  width: 100%;
+  border: solid 1px #ddd;
+}
+a{
+  text-decoration: none;
+  color: dodgerblue;
+}
+p{
+  line-height: 1.6;
+  letter-spacing: 0.7px;
+}
+#hierarchies110354052667093132 > div{
+  border: solid 1px #eee;
+  padding: 10px;
+  margin: 20px auto;
+}
+#\31 10358238847217203 > div:nth-child(2),
+#\31 10358238847217203 > div:nth-child(3),
+#\31 10360039525492047 > div:nth-child(2),
+#\31 10354504611615187 > div:nth-child(2),
+#\31 10355236139667741 > div:nth-child(2),
+#\31 10355814978790433 > div:nth-child(2),
+#\31 10355814978790433 > div:nth-child(3),
+#\31 10355826363056591 > div:nth-child(2)
+{
+  text-align: center;
+  margin: 15px auto;
+}
+
+@media only screen and (max-width: 600px) {
+  input{
+      width: 250px;
+  }
+
+}
